@@ -1,0 +1,203 @@
+```{r setup}
+library(MASS)
+library(modelr)
+library(car)
+library(GGally)
+library(gridExtra)
+library(tidyverse)
+library(mosaic)
+library(knitr)
+library(ggformula)
+library(broom)
+library(PerformanceAnalytics)
+library(corrplot)
+library(dummies)
+library(tseries)
+library(dplyr)
+library(olsrr)
+```
+
+```{r oil}
+#Problem 1
+
+oilData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P189.txt")
+#print(oilData)
+
+Y = log(oilData$Barrels)
+X = oilData$Year
+
+oilFit <- lm(Y~X)
+r = rstandard(oilFit)
+#durbinWatsonTest(oilFit)
+#runs.test(as.factor(rstandard(oilFit) > 0))
+oilData2 <- mutate(oilData,
+                   positive = 1 * (r > 0),
+                   sign = factor(positive, labels = c("-", "+")))
+runsfit <- runs.test(oilData2$sign)
+runsfit
+```
+
+```{r DJIA}
+#Problem 2
+
+DJIAdata <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P229-30.txt")
+print(DJIAdata)
+
+Y = DJIAdata$DJIA
+X = DJIAdata$Day
+Y2 = lag(Y)
+Y3 = log(Y2)
+Y4 = lag(Y3)
+Y7 = log(Y)
+
+plot(X, Y7,
+     main = "log(DJIA) Over All Trading Days",
+     xlab = "Day",
+     ylab = "log(DJIA) (points)")
+
+DJIAfit <- lm(Y3~X)
+r = rstandard(DJIAfit)
+yhat = fitted(DJIAfit)
+#summary(DJIAfit)
+
+#plot(X, r,
+#     main = "Std. Residuals of Log(Y) by Day",
+#     xlab = "Day",
+#     ylab = "Std. Residuals")
+
+#plot(Y3, Y4,
+#     main = "log(DJIA) vs. log(Lag DJIA)",
+#     xlab = "DJIA",
+#     ylab = "Lagged DJIA")
+
+DJIAfit2 <- lm(Y4~Y3)
+r2 = rstandard(DJIAfit2)
+r2[262] = NA
+
+#plot(X, r2,
+#     main = "Std. Residuals of log(Lag DJIA)",
+#     xlab = "Days",
+#     ylab = "Std. Residuals")
+
+#Problem 3
+
+X2 = X[c(1:130)]
+Y5 = Y4[c(1:130)]
+
+#length(X2)
+#length(Y5)
+
+X3 = X[c(132:262)]
+Y6 = Y4[c(132:262)]
+
+DJIAfit3 <- lm(Y6~X3)
+#summary(DJIAfit3)
+#summary.aov(DJIAfit3)
+
+#part b
+
+# grab the part of the dataset from days 131 through 145
+#mydata <- filter(DJIAdata, (Day >= 130) & (Day <= #145))
+mydata2 <- filter(DJIAdata, Day > 131)
+
+# Save the predictions for Day 131 through 145
+#mydata$yhat = predict(DJIAfit3, newdata = mydata)
+#mydata$predictionerr = Y6 - mydata$yhat
+
+mydata2$yhat2 = predict(DJIAfit3, newdata2=mydata2)
+mydata2$predictionerr2 = Y6 - mydata2$yhat2
+
+#partca = (mydata$predictionerr)**2
+#partc = sum(partca) / 16
+#print(partc)
+
+partda = (mydata2$predictionerr2)**2
+partd = sum(partda) / 132
+```
+
+```{r}
+#Problem 4
+homeSalesData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P329.txt")
+head(homeSalesData)
+
+Y = homeSalesData$Y
+X1 = homeSalesData$X1
+X2 = homeSalesData$X2
+X3 = homeSalesData$X3
+X4 = homeSalesData$X4
+X5 = homeSalesData$X5
+X6 = homeSalesData$X6
+X7 = homeSalesData$X7
+X8 = homeSalesData$X8
+X9 = homeSalesData$X9
+
+#part a
+
+homefit1 <- lm(Y~X1+X2+X3+X4+X5+X6+X7+X8+X9)
+summary(homefit1)
+#anova(homefit1)
+
+#part b
+
+homefit2 <- lm(Y~X1+X2+X3+X4+X6+X7+X8)
+summary(homefit2)
+#anova(homefit2)
+
+#Method/Stat1
+anova(homefit2, homefit1)
+#Method/Stat2
+
+#part c
+
+homefit3 <- lm(Y~X1+X6+X8)
+summary(homefit3)
+anova(homefit3)
+
+#Multicollinearity
+
+#part d
+
+homefit4 <- lm(Y~X1)
+summary(homefit4)
+
+#part e
+
+lmfit <- lm(Y~X1+X2+X3+X4+X5+X6+X7+X8+X9, data = homeSalesData)
+ols_step_forward(lmfit, penter = 0.20)
+lmfit2 <- lm(Y~X1+X2, data = homeSalesData)
+summary(lmfit2)
+
+#part f
+
+ols_step_backward(lmfit, prem = 0.20)
+lmfit3 <- lm(Y~X1+X2+X5+X7, data = homeSalesData)
+summary(lmfit3)
+
+#part g
+
+#notforuuuuuuuuuuume
+```
+
+```{r}
+#Problem 5
+tamData <- read.csv("http://statistics.uchicago.edu/~collins/data/STAT224other/tam.txt")
+tamData
+
+#part a
+tally(dead~trt, data = tamData)
+oddsRatio(tally(dead~trt, data = tamData))
+
+tally(recur~trt, data = tamData)
+oddsRatio(tally(recur~trt, data = tamData))
+
+#part b
+glmfit <- glm(recur~trt+age+bmi+tumsiz, data = tamData, family = binomial)
+tidy(glmfit, conf.int = TRUE)
+coef(glmfit)
+exp(coef(glmfit))
+
+#part c
+tally(endo~trt, data = tamData)
+oddsRatio(tally(endo~trt, data = tamData))
+```
+
