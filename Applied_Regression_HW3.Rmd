@@ -1,0 +1,58 @@
+---
+title: "Homework 3"
+author: "Patrick Halkett"
+date: "October 20, 2017"
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+library(MASS)
+library(modelr)
+library(car)
+library(GGally)
+library(gridExtra)
+library(tidyverse)
+library(mosaic)
+library(knitr)
+library(ggformula)
+library(broom)
+```
+```{r cars}
+milkData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P004.txt")
+#summary(milkData)
+Y=milkData$CurrentMilk
+X1=milkData$Previous
+X2=milkData$Fat
+X3=milkData$Protein
+X4=milkData$Days
+X5=milkData$Lactation
+X6=milkData$I79
+
+#ggpairs(milkData)
+
+lmfit <- lm(Y~X1+X2+X3+X4+X5+X6)
+e = residuals(lmfit)
+yhat = fitted(lmfit)
+milkData <- mutate(milkData, e = residuals(lmfit), yhat = fitted(lmfit))
+std_residuals = rstandard(lmfit)
+n <- dim(milkData)[1]
+
+#boxplot(r, horizontal = TRUE, pch = 20)
+#gf_dotplot(~r, data = milkData)
+gf_qq(~r, data = milkData, distribution = qnorm)
+#cook_distance <- cooks.distance(lmfit)
+#plot(c(1:n), cook_distance)
+
+#pairs(~Y+X1+X2+X3+X4+X5+X6, data = milkData,
+      #main="Simple Scatterplot Matrix")
+#plot(yhat, r,
+     #ylab = "Residuals", xlab = "yhat (fitted #values)",
+     #main = "Milk Production Residuals")
+#abline(0,0)
+
+```
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
