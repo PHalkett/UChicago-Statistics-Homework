@@ -1,0 +1,55 @@
+---
+title: "Untitled"
+author: "Patrick Halkett"
+date: "October 22, 2017"
+output: html_document
+---
+
+
+```{r data}
+library(MASS)
+library(modelr)
+library(car)
+library(GGally)
+library(gridExtra)
+library(tidyverse)
+library(mosaic)
+library(knitr)
+library(ggformula)
+library(broom)
+library(PerformanceAnalytics)
+library(corrplot)
+```
+
+```{r data}
+diamondData <- read.csv("http://statistics.uchicago.edu/~collins/data/STAT224other/diamond_set1.txt")
+str(diamondData)
+diamondData$numcolor <- as.integer(diamondData$x2, levels = c("J","I","H","G","F","E","D"))
+print(diamondData$numcolor)
+table(diamondData$numcolor, diamondData$x2)
+fit <- lm(diamondData$price~diamondData$numcolor)
+#summary(fit)
+fit2 <- lm(diamondData$price~diamondData$carat)
+summary(fit2)
+fit3 <- lm(diamondData$price~diamondData$carat+diamondData$numcolor)
+#ggplot(diamonds, aes(x=carat, y=price, color=cut)) + geom_point()
+
+e = residuals(fit3)
+yhat = fitted(fit3)
+diamondData <- mutate(diamondData, e = residuals(fit3), yhat = fitted(fit3))
+std_residuals = rstandard(fit3)
+n <- dim(diamondData)[1]
+
+#boxplot(r, horizontal = TRUE, pch = 20)
+#gf_dotplot(~r, data = milkData)
+#gf_qq(~r, data = milkData, distribution = qnorm)
+cook_distance <- cooks.distance(fit3)
+plot(c(1:n), cook_distance)
+
+#pairs(~Y+X1+X2+X3+X4+X5+X6, data = milkData,
+      #main="Simple Scatterplot Matrix")
+plot(yhat, std_residuals,
+     ylab = "Residuals", xlab = "yhat (fitted values)",
+     main = "Diamond Data Residuals")
+abline(0,0)
+```
