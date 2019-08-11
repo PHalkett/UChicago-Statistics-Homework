@@ -1,0 +1,210 @@
+---
+title: "Homework 5"
+author: "Patrick Halkett"
+date: "November 10, 2017"
+output: html_document
+---
+
+```{r setup}
+library(MASS)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+library(dplyr)
+library(car)
+library(modelr)
+library(GGally)
+library(gridExtra)
+library(dummies)
+library(magrittr)
+library(tseries)
+options(width=70)
+```
+
+```{r cars}
+#Problem 1
+
+oilData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P189.txt")
+#head(oilData)
+
+Y = oilData$Barrels
+X = oilData$Year
+
+Y1 = log(Y)
+
+#plot(X,Y1)
+
+fitsudo <- lm(Y1~X)
+summary(fitsudo)
+
+resid1 = rstandard(fitsudo)
+yhat1 = fitted(fitsudo)
+n1 <- dim(oilData)[1]
+cook_distance1 <- cooks.distance(fitsudo)
+
+#plot(c(1:n1), cook_distance1)
+#plot(yhat1, resid1,
+#     ylab = "std. Residuals", xlab = "yhat (fitted #values)",
+#     main = "Oil Data Std. Residuals")
+#gf_qq(~resid1, data = oilData, distribution = qnorm)
+
+oilData2 <- mutate(oilData,
+                   positive = 1 * (resid1 > 0),
+                   sign = factor(positive, labels = c("-", "+")))
+
+#plot(X, resid1,
+#     main = "Predictor vs. std. Residuals",
+#     xlab = "Year",
+#     ylab = "std. Residuals")
+
+#durbinWatsonTest(fitsudo)
+runs.test(oilData2$sign)
+```
+
+```{r pressure}
+#Problem 2
+
+compData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P190.txt")
+print(compData)
+
+Y = compData$Price
+X = compData$Year
+
+#plot(X,Y)
+
+compData2 <- mutate(compData,
+                    t = Year - 1987)
+
+t = compData2$t
+Pt = log(Y)
+lmfit.log <- lm(Pt~t, data = compData2)
+#plot(t, Pt, main = "Megabyte Price",
+#     xlab = "Years after 1987",
+#     ylab = "Log(#) of Price")
+
+compDatac <- mutate(compData2,
+                    period1 = as.numeric(Year %in% c("1989", "1990", "1991")),
+                    period2 = as.numeric(Year %in% c("1992", "1993", "1994", "1995")))
+
+p1int = compDatac$period1*t
+p2int = compDatac$period2*t
+
+
+resid2 = rstandard(lmfit.log)
+yhat2 = fitted(lmfit.log)
+
+fitc <- lm(Pt~t+period1+period2+period1*t+period2*t, data = compDatac)
+
+reducedfitc <- lm(Pt~t+period1+period2, data = compDatac)
+
+summary(fitc)
+anova(fitc, reducedfitc)
+
+residd = rstandard(fitc)
+yhatd = fitted(fitc)
+
+plot(yhatd, residd, main = "Part d) Std. Residuals vs. Fitted Values",
+     ylab = "std. residuals", xlab = "yhat (fitted values)")
+
+plot(t, residd, main = "Std. Residuals vs. Time",
+     ylab = "std. residuals", xlab = "Time (t)")
+
+#plot(t, resid2, main = "Period vs. residuals",
+#     xlab = "Period (t)",
+#     ylab = "std. residuals")
+
+fitp1 <- lm(Pt~t+period1, data = compDatac)
+summary(fitp1)
+
+
+```
+
+```{r}
+#Problem 3
+
+diamondData <- read.csv("http://statistics.uchicago.edu/~collins/data/STAT224other/diamond_set1.txt")
+
+diamondData$numcolor <- as.integer(diamondData$x2, levels = c("J","I","H","G","F","E","D"))
+
+diamondData <- mutate(diamondData,
+                      clarity.medium = as.numeric(x3 %in% c("VS1", "VS2")),
+                      clarity.high = as.numeric(x3 %in% c("VVS1", "VVS2")))
+
+print(diamondData)
+
+diamondFit <- lm(price ~ carat + numcolor + clarity.high + clarity.medium, data = diamondData)
+
+reducedFit = lm(price ~ carat + numcolor, data=diamondData)
+
+anova(reducedFit, diamondFit)
+
+diamondDataCut <- mutate(diamondData,
+                            cut.fair = as.numeric(x1 %in% c("Fair")))
+
+print(diamondDataCut)
+
+diamondFit2 <- lm(price ~ carat + numcolor + clarity.high + clarity.medium + cut.fair, data = diamondDataCut)
+
+reducedFit2 <- lm(price ~ carat + numcolor + clarity.high + clarity.medium, data=diamondDataCut)
+
+anova(reducedFit2,diamondFit2)
+
+
+carat = c(0.32, 0.42, 0.50,0.62,0.80,0.87,0.98) 
+color_letter = c("D", "E", "F","G","D","E","F") 
+numcolor = c(0,1,2,3,0,1,2) 
+clarity.high = c(1,0,1,0,1,0,0) 
+clarity.medium = c(0,0,0,1,0,1,0) 
+cut.fair = c(0,0,0,0,0,1,0)
+actualPrice = c(818,1106,2350,2970,4795,3236,4413)
+
+exampleData = data.frame(carat, numcolor, clarity.high, clarity.medium, cut.fair) 
+
+predictedPrice <- predict(diamondFit2,exampleData)
+
+print("Predicted price")
+print(predictedPrice)
+
+difference <- (actualPrice - predictedPrice)/actualPrice
+
+print("Price Difference,")
+print(difference)
+
+#print(diamondData$numcolor)
+#table(diamondData$numcolor, diamondData$x2)
+#fit <- lm(diamondData$price~diamondData$numcolor)
+#summary(fit)
+#fit2 <- lm(diamondData$price~diamondData$carat)
+#summary(fit2)
+#ggplot(diamonds, aes(x=carat, y=price, color=cut)) + geom_point()
+#diamondData2 <- mutate(diamondData,
+#                          F1 = 1 * #(x1=="Excellent"),
+#                          F2 = 1 * #(x1=="VeryGood"),
+#                          F3 = 1 * (x1=="Good"),
+#)
+
+#lowC1 = diamondData$x3=="I"
+#lowC2 = diamondData$x3=="SI1"
+#lowC3 = diamondData$x3=="SI2"
+#lowC = lowC1 + lowC2 + lowC3
+#print(lowC)
+
+#head(diamondData2)
+
+#Y = diamondData2$price
+#X1 = diamondData2$carat
+#X2 = diamondData2$numcolor
+#Fi1 = diamondData2$F1
+#Fi2 = diamondData2$F2
+#Fi3 = diamondData2$F3
+
+#fit2 <- lm(Y~X1+X2)
+#fit3 <- lm(Y~X1+X2+Fi1+Fi2+Fi3)
+#summary(fit3)
+#anova(fit2)
+#anova(fit3)
+```
+
