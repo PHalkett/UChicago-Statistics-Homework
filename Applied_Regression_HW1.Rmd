@@ -1,0 +1,110 @@
+---
+title: "Homework 1"
+author: "Patrick Halkett"
+date: "October 1, 2017"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(MASS)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+options(width=70)
+```
+
+```{r cars}
+AnscombeData <- read.delim("P029b.txt")
+glimpse(AnscombeData)
+head(AnscombeData)
+```
+
+```{r, echo=FALSE, fig.height=12, fig.width=12}
+fit1 <- lm(Y1~X1, data = AnscombeData)
+fit2 <- lm(Y2~X2, data = AnscombeData)
+fit3 <- lm(Y3~X3, data = AnscombeData)
+fit4 <- lm(Y4~X4, data = AnscombeData)
+
+print("Anscombe Data 1")
+summary(fit1)
+cor(AnscombeData$X1, AnscombeData$Y1)
+t.test(AnscombeData$Y1, AnscombeData$X1, data = AnscombeData)
+
+print("Anscombe Data 2")
+summary(fit2)
+cor(AnscombeData$X2, AnscombeData$Y2)
+t.test(AnscombeData$Y2, AnscombeData$X2, data = AnscombeData)
+
+print("Anscombe Data 3")
+summary(fit3)
+cor(AnscombeData$X3, AnscombeData$Y3)
+t.test(AnscombeData$Y3, AnscombeData$X3, data = AnscombeData)
+
+print("Anscombe Data 4")
+summary(fit4)
+cor(AnscombeData$X4, AnscombeData$Y4)
+t.test(AnscombeData$Y4, AnscombeData$X4, data = AnscombeData)
+
+```
+```{r}
+heightData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P052.txt")
+glimpse(heightData)
+fit <- lm(Husband~Wife, data = heightData)
+summary(fit)
+```
+```{r}
+print("5a) Covariance between heights of husbands and wives: ")
+cov(heightData$Wife, heightData$Husband)
+
+print("5b) Covariance if heights were measured in inches: ")
+Husband2 <- heightData$Husband * 0.39
+cov(heightData$Wife, Husband2)
+
+print("5c) Correlation coefficient between heights of husbands and wifes: ")
+cor(heightData$Wife, heightData$Husband)
+gf_point(Wife ~ Husband, data = heightData)
+
+print("5d) Correlation if heights were measured in inches: ")
+cor(heightData$Wife, Husband2)
+
+print("5e) If every man married a woman exactly 5 cm shorter than him, the correlation would be 1.00")
+
+print("5f) I would probably choose the husband height as the response variable since the female is usually picky when it comes to choosing a mate (in the animal kingdom)")
+
+t.test(heightData$Wife, heightData$Husband)
+
+```
+
+```{r}
+newsData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P054.txt")
+glimpse(newsData)
+gf_point(Sunday ~ Daily, data = newsData)
+line <- lm(newsData$Sunday ~ newsData$Daily)
+lm(newsData$Sunday ~ newsData$Daily)
+plot(newsData$Daily, newsData$Sunday, pch = 16, cex = 1.3, col = "black", main = "Sunday vs Daily", xlab = "Daily", ylab = "Sunday")
+abline(13.84, 1.34)
+abline(newsData$Sunday ~ newsData$Daily)
+summary(line)
+new <- data.frame(Daily = c(500))
+predict(line, new, interval = "confidence", level = 0.95)
+```
+```{r}
+newsData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P054.txt")
+plot(newsData$Daily, newsData$Sunday)
+newsData.lm <- lm(Sunday ~ Daily, data = newsData)
+newsData.lm
+confint(newsData.lm)
+summary(newsData.lm)
+new <- data.frame(Daily = c(500))
+predict(newsData.lm, new, interval = "confidence", level = 0.95)
+predict(newsData.lm, new, interval = "predict", level = 0.95)
+revisednew <- data.frame(Daily = c(2000000))
+predict(newsData.lm, revisednew, interval = "predict", level = 0.95)
+```
+
