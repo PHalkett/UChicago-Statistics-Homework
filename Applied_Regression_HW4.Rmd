@@ -1,0 +1,136 @@
+---
+title: "Untitled"
+author: "Patrick Halkett"
+date: "November 4, 2017"
+output: html_document
+---
+
+```{r setup}
+library(MASS)
+library(modelr)
+library(car)
+library(GGally)
+library(gridExtra)
+library(tidyverse)
+library(mosaic)
+library(knitr)
+library(ggformula)
+library(broom)
+library(PerformanceAnalytics)
+library(corrplot)
+library(dummies)
+options(max.print = 10000)
+```
+
+```{r data, echo=TRUE}
+
+#Question 1
+
+rawData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P151-153.txt")
+
+rawData2 <- mutate(rawData,
+                   r2 = 1 * (region==2),
+                   r3 = 1 * (region==3),
+                   r4 = 1 * (region==4),
+                   year = year - 1960)
+
+Y = log10(rawData2$y)
+X1 = rawData2$x1
+X2 = rawData2$x2
+X3 = rawData2$x3
+X4 = rawData2$year
+X5 = rawData2$r2
+X6 = rawData2$r3
+X7 = rawData2$r4
+X8 = X4*X5
+X9 = X4*X6
+X10 = X4*X7
+
+Xa = X5*X1
+Xb = X5*X2
+Xc = X5*X3
+Xd = X6*X1
+Xe = X6*X2
+Xf = X6*X3
+Xg = X7*X1
+Xh = X7*X2
+Xi = X7*X3
+Xx = X4*X1
+Xy = X4*X2
+Xz = X4*X3
+
+model <- lm(Y~x1+X2+X3+X4+X5+X6+X7+X8+X9+X10, data = rawData2)
+
+model2 <- lm(Y~X1+X2+X3+Xa+Xb+Xc+Xd+Xe+Xf+Xg+Xh+Xi+Xx+Xy+Xz)
+#a1 = rstandard(model)
+#a2 = fitted(model)
+#n1 <- dim(rawData2)[1]
+
+#plot(a1, a2,
+#     ylab = "Residuals", xlab = "yhat (fitted #values)",
+#     main = "Std. Residuals Vs. Fitted Values")
+#abline(0,0)
+
+#cook_distance <- cooks.distance(model)
+#plot(c(1:n1), cook_distance)
+#gf_qq(~a1, data = rawData2, distribution = qnorm)
+
+#pairs(~Y+X1+X2+X3, data = rawData2,
+#      main="Simple Scatterplot Matrix")
+
+summary(model)
+anova(model)
+```
+
+```{r data, echo=FALSE}
+
+#Question 2
+
+fertilizerData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P158.txt")
+head(fertilizerData)
+fertilizerData2 <- mutate(fertilizerData, 
+                          F1 = 1 * (Fertilizer==1),
+                          F2 = 1 * (Fertilizer==2),
+                          F3 = 1 * (Fertilizer==3)
+                          )
+Y = fertilizerData2$Yield
+Fi1 = fertilizerData2$F1
+Fi2 = fertilizerData2$F2
+Fi3 = fertilizerData2$F3
+Fi = Fi1+Fi2+Fi3
+
+#print(fertilizerData2)
+lmfit <- lm(Y~Fi)
+summary(lmfit)
+anova(lmfit)
+```
+
+```{r}
+
+#Question 4
+
+wineData <- read.delim("http://statistics.uchicago.edu/~collins/data/STAT224other/wine.txt")
+
+Y1 = wineData$price
+X1 = wineData$vintage_yr
+
+boxcox(lm(Y1~X1))
+boxcox(lm(Y1~X1), lambda = seq(-0.5, 1, 0.1))
+
+#wineData2 <- mutate(wineData,
+#                    price2 = price ** (0.233))
+#wineData3 <- mutate(wineData,
+#                    price3 = log10(price))
+
+Y2 = wineData$price ** (0.233)
+Y3 = log(wineData$price)
+
+fit1 <- lm(Y2~X1)
+fit2 <- lm(Y3~X1)
+
+#gf_point(price~vintage_yr, data = wineData2)
+
+summary(fit1)
+summary(fit2)
+```
+
