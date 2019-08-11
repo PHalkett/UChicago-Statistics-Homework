@@ -1,0 +1,111 @@
+---
+title: "Homework 2"
+author: "Patrick Halkett"
+date: "October 12, 2017"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r exam}
+examData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P083.txt")
+summary(examData)
+#cov(examData$P1, examData$F)
+cor(examData$P1, examData$F)
+
+#cov(examData$P2, examData$F)
+cor(examData$P2, examData$F)
+
+#cov(examData$P1, examData$P2)
+cor(examData$P1, examData$P2)
+
+lm(F~P1, data = examData)
+lm(F~P2, data = examData)
+lm(F~P1+P2, data = examData)
+
+summary(lm(F~P1, data = examData))
+summary(lm(F~P2, data = examData))
+summary(lm(F~P1+P2, data = examData))
+```
+```{r}
+library("PerformanceAnalytics")
+library(GGally)
+library(ggformula)
+library(ggplot2)
+cigData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P088.txt")
+#head(cigData)
+#summary(cigData)
+Y=cigData$Sales
+X1=cigData$Age
+X2=cigData$HS
+X3=cigData$Income
+X4=cigData$Black
+X5=cigData$Female
+X6=cigData$Price
+
+#lmfit <- lm(Y~X1+X2+X3+X4+X5+X6)
+lmfit <- lm(Y~X1+X3+X4+X6)
+
+#summary(fit1)
+
+e = residuals(lmfit)
+yhat = fitted(lmfit)
+cigData <- mutate(cigData, e = residuals(lmfit), yhat = fitted(lmfit))
+std_residuals = rstandard(lmfit)
+
+plot(yhat, std_residuals,
+     ylab = "Std. Residuals", xlab = "yhat (fitted values)",
+     main = "Cigarette Sales")
+abline(0,0)
+
+#gf_point(std_residuals~c(1:n), data = cigData)
+```
+```{r}
+cigData <- read.delim("http://statistics.uchicago.edu/~collins/data/RABE5/P088.txt")
+Y=cigData$Sales
+X1=cigData$Age
+X2=cigData$Income
+X3=cigData$Black
+X4=cigData$Price
+fit0 <- lm(Y~X1+X2+X3+X4)
+fit9 <- lm(Y~X1+X3+X4)
+fit8 <- lm(Y~X2)
+
+#summary(fit8)
+#summary(fit9)
+summary(fit0)
+```
+
+```{r}
+diamondData <- read.csv("http://statistics.uchicago.edu/~collins/data/STAT224other/diamond_set1.txt")
+#str(diamondData)
+diamondData$numcolor <- as.integer(diamondData$x2, levels = c("J","I","H","G","F","E","D"))
+#print(diamondData)
+#print(diamondData$numcolor)
+#table(diamondData$numcolor, diamondData$x2)
+#fit <- lm(diamondData$price~diamondData$numcolor)
+#summary(fit)
+#fit2 <- lm(diamondData$price~diamondData$carat)
+#summary(fit2)
+#ggplot(diamonds, aes(x=carat, y=price, color=cut)) + geom_point()
+diamondData2 <- mutate(diamondData,
+                          F1 = 1 * (x1=="Excellent"),
+                          F2 = 1 * (x1=="VeryGood"),
+                          F3 = 1 * (x1=="Good"),
+)
+
+head(diamondData2)
+
+Y = diamondData2$price
+X1 = diamondData2$carat
+X2 = diamondData2$numcolor
+Fi1 = diamondData2$F1
+Fi2 = diamondData2$F2
+Fi3 = diamondData2$F3
+
+fit2 <- lm(Y~X1+X2)
+fit3 <- lm(Y~X1+X2+Fi1+Fi2+Fi3)
+#summary(fit3)
+anova(fit2)
+anova(fit3)
+```
