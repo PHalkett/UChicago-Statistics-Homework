@@ -1,0 +1,133 @@
+```{r}
+library(MASS)
+library(GGally)
+library(openintro)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+library(doBy)
+library(binom)
+library(extRemes)
+library(forcats)
+library(dplyr)
+```
+
+```{r}
+#Problem 2
+
+crabData = read.table("http://statistics.uchicago.edu/~collins/data/s226/horseshoecrabs.txt", header=TRUE)
+
+#Recode reponse to binary (satellite or not) and color indicator variable (dark or not)
+crabData = mutate(crabData,
+                 has.satellite = as.numeric(Satellites > 0),
+                 Dark = as.numeric(Color == 4))
+head(crabData)
+
+
+#Now we want to work through the forward selection process
+
+#Model 1 includes only the intercept represented by 1
+
+#The GLM is a binomial where the number of satellites is compared to the intercept (= 1)
+model1 = glm(has.satellite~1, family=binomial, data=crabData)
+#Deviance based on only the intercept model
+model1$deviance
+
+#Model 2 can be the number of satellites based on shell width
+model2.width = glm(has.satellite~Width, family=binomial, data=crabData)
+#Deviance based on model with only width
+model2.width$deviance
+
+#Model 2 can be the number of satellites based on weight
+model2.weight = glm(has.satellite~Weight, family=binomial, data=crabData)
+#Deviance based on model with only weight
+model2.weight$deviance
+
+#Model 2 can be the number of satellites based on spine condition
+model2.spine = glm(has.satellite~Spine, family=binomial, data=crabData)
+#Deviance based on model with only spine condition
+model2.spine$deviance
+
+#Model 2 can be the number of satellites based on dark or not
+model2.dark = glm(has.satellite~Dark, family=binomial, data=crabData)
+#Deviance based on model with only color (dark or not)
+model2.dark$deviance
+
+# LR statistic = difference in deviances 
+G2.width = model1$deviance - model2.width$deviance 
+G2.weight = model1$deviance - model2.weight$deviance 
+G2.spine = model1$deviance - model2.spine$deviance 
+G2.dark = model1$deviance - model2.dark$deviance
+
+#All of the LR statistics for the 2 parameter models 
+print("LR Statistics")
+G2.weight
+G2.width
+G2.spine
+G2.dark
+
+#P-value = 1 - pchisq(LRstatistic, df)
+pval.weight = 1 - pchisq(G2.weight, 1)
+pval.width = 1 - pchisq(G2.width, 1)
+pval.spine = 1 - pchisq(G2.spine, 1)
+pval.dark = 1 - pchisq(G2.dark, 1)
+
+#The p-values for the 2 parameter models using a Chi-square distribution
+print("P-values")
+pval.weight
+pval.width
+pval.spine
+pval.dark
+
+#Next Iteration
+model3a = glm(has.satellite~Width+Dark, family=binomial, data=crabData)
+model3a$deviance
+
+G2.model3a = model2.width$deviance - model3a$deviance
+pval.model3a = 1 - pchisq(G2.model3a, 1)
+pval.model3a
+
+model3b = glm(has.satellite~Width+Dark+Width*Dark, family=binomial, data=crabData)
+model3b$deviance
+
+G2.model3b = model3a$deviance - model3b$deviance
+pval.model3b = 1 - pchisq(G2.model3b, 1)
+pval.model3b
+```
+
+```{r}
+#Problem 4
+personalityData = read.csv("http://statistics.uchicago.edu/~collins/data/s226/personalities.csv", header=TRUE)
+
+personalityData = mutate(personalityData, 
+                         Total = Yes + No, 
+                         prop.Alcohol = Yes / Total)
+
+#model3 = glm(prop.Alcohol ~ SN + EI + JP + TF + SN:TF, family = binomial, weights = Total, data = personalityData)
+
+#model2 = glm(prop.Alcohol~SN+EI+JP+TF, family=binomial, weights=Total, data=personalityData)
+
+#tidy(model2)
+
+#anova(model3, model2, test="Chisq")
+
+#Problem 4 part H
+modela = glm(prop.Alcohol~SN+EI+JP+TF, family="binomial", weights=Total, data=personalityData)
+
+modelb = glm(prop.Alcohol~SN+EI+TF, family="binomial", weights=Total, data=personalityData)
+
+modelc = glm(prop.Alcohol~SN+EI+JP+TF+EI:JP, family="binomial", weights=Total, data=personalityData)
+
+modeld = glm(prop.Alcohol~SN+EI+JP+SN:TF, family="binomial", weights=Total, data=personalityData)
+
+#stepAIC(modela, scope=~SN*EI*JP*TF, direction="forward")
+#stepAIC(modelb, scope=~SN*EI*TF, direction="forward")
+#stepAIC(modelc, scope=~SN*EI*JP*TF*EI:JP, direction="forward")
+stepAIC(modeld, scope=~SN*EI*JP*SN:TF, direction="forward")
+
+fit1 = glm(prop.Alcohol~TF+JP, weights=Total, family=binomial, data=personalityData)
+tidy(fit1)
+```
