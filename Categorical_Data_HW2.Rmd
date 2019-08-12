@@ -1,0 +1,225 @@
+---
+title: "STAT226: Homework 2"
+author: "Patrick Halkett"
+date: "January 13, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, include=FALSE}
+library(MASS)
+library(GGally)
+library(openintro)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+library(doBy)
+library(binom)
+```
+
+```{r}
+#################################################################
+#Problem 1 part a
+#################################################################
+n = 1103
+g = 854
+y = 249
+
+p = y/n
+p2 = 1-p
+
+SE = ((p*p2)/n)**(1/2)
+z = (p-0.25)/SE
+print(z)
+
+p3 = 0.25
+p4 = 0.75
+
+SE2 = ((p3*p4)/n)**(1/2)
+z2 = (p-p3)/SE2
+
+L0 = 249*log(249/276)
+L1 = 854*log(854/827)
+
+Lstat = 2*(L0+L1)
+
+P = 2*pnorm(-abs(z))
+P2 = 2*pnorm(-abs(z2))
+P3 = 2*pnorm(-abs(Lstat))
+
+print("Wald")
+print(z)
+print(P)
+
+print("score")
+print(z2)
+print(P2)
+
+print("LR")
+print(Lstat)
+print(P3)
+
+#################################################################
+#Problem 1 part b
+#################################################################
+WaldZ = 1.645
+
+PCI1 = P - WaldZ*SE
+PCI2 = P + WaldZ*SE
+
+print("90% Wald CI")
+print(PCI1)
+print(PCI2)
+
+#################################################################
+#Problem 1 part c
+#################################################################
+scoreL = (y + 1.645^2/2 - 1.645 * sqrt( y * (1-y/n) + 1.645^2/4) ) / (n + 1.645^2)
+scoreU = (y + 1.645^2/2 + 1.645 * sqrt( y * (1-y/n) + 1.645^2/4) ) / (n + 1.645^2)
+print(scoreL)
+print(scoreU)
+
+#################################################################
+#Problem 1 part d
+#################################################################
+pstar = (y + (1.645**2 / 2)) / (n + 1.645**2)
+
+pL = pstar - (1.645) * ((pstar*(1-pstar))/n)**(0.5)
+pU = pstar + (1.645) * ((pstar*(1-pstar))/n)**(0.5)
+
+print(pL)
+print(pU)
+
+#################################################################
+#Problem 1 part e
+#################################################################
+prop.test(249, 1103, p=0.25, conf.level = 0.90, correct = FALSE)
+
+binom.confint(249, 1103, conf.level = 0.90, method="asymptotic")
+
+binom.confint(249, 1103, conf.level = 0.90, method="wilson")
+
+binom.confint(249, 1103, conf.level = 0.90, method="ac")
+
+```
+
+```{r}
+#################################################################
+#Problem 2 part c
+#################################################################
+zst = (-0.50)/((0.25 / 25)**0.5)
+P4 = 2*pnorm(-abs(zst))
+print("score test P-value")
+print(P4)
+
+#################################################################
+#Problem 2 part d
+#################################################################
+prop.test(0, 25, p=0.50, conf.level = 0.95, correct = FALSE)
+```
+
+```{r}
+#################################################################
+#Problem 3 part a
+#################################################################
+n3 = 20
+y3 = 8
+pi3 = 0.20
+
+pbinom(y3-1, n3, pi3, lower.tail = FALSE)
+
+#################################################################
+#Problem 3 part b
+#################################################################
+#binom.test(y3, n3, p=0.2, alternative = "two.sided")
+dbinom(y3-1, n3, pi3, log = FALSE)
+```
+
+```{r}
+#################################################################
+#Problem 4 part a
+#################################################################
+print(0.50)
+
+#################################################################
+#Problem 4 part b
+#################################################################
+print("Ha: pi > 0.50")
+
+#################################################################
+#Problem 4 part c
+#################################################################
+print("Ha: pi =/= 0.50")
+
+#################################################################
+#Problem 4 part d
+#################################################################
+n4 = 54
+y4 = 22
+pi4 = 0.5
+
+print("We make the assumption that each of the 6 types of dog has the same probabilty of success. This may or may not be a reasonable assumption based on the sizes/breeds of dog. I would argue that a larger dog might have more olifactory receptors and therefore may be more successful.")
+
+#################################################################
+#Problem 4 part e
+#################################################################
+#pbinom(y4, n4, pi4, lower.tail = TRUE)
+binom.test(y4, n4, p=0.5, alternative = "greater")
+#################################################################
+#Problem 4 part f
+#################################################################
+binom.test(y4, n4, p=0.5, alternative = "two.sided")
+
+```
+
+```{r}
+#################################################################
+#Problem 5 part a
+#################################################################
+y5 = rbinom(1000, size=25, prob=0.06)
+n5 = 25
+pi5 = 0.06
+p5 = y5/n5
+
+se.wald = sqrt(p5*(1-p5)/n5)
+
+zWald = 1.96
+lower.wald = p5 - zWald * se.wald
+upper.wald = p5 + zWald * se.wald
+
+contains.pi.wald = (lower.wald < pi5) & (upper.wald > pi5)
+
+data.frame(y5, p5, se.wald, lower.wald, upper.wald, contains.pi.wald)[1:10,]
+
+sum(contains.pi.wald)
+
+#################################################################
+#Problem 5 part b
+#################################################################
+p5star = (y5 + 2)/(n5 + 4)
+lower.AC = p5star - (1.96*(sqrt((p5star*(1-p5star))/(n5+4))))
+upper.AC = p5star + (1.96*(sqrt((p5star*(1-p5star))/(n5+4))))
+sum((lower.AC < pi5) & (upper.AC > pi5))
+
+#################################################################
+#Problem 5 part c
+#################################################################
+lower.score = (y5 + zWald^2/2 - zWald * sqrt( y5 * (1-y5/n5) + zWald^2/4) ) / (n5 + zWald^2)
+upper.score = (y5 + zWald^2/2 + zWald * sqrt( y5 * (1-y5/n5) + zWald^2/4) ) / (n5 + zWald^2)
+sum((lower.score < pi5) & (upper.score > pi5))
+
+#################################################################
+#Problem 5 part d
+#################################################################
+#Qualitative
+
+#################################################################
+#Problem 5 part e
+#################################################################
+
+```
+
