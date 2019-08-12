@@ -1,0 +1,134 @@
+```{r}
+library(MASS)
+library(GGally)
+library(openintro)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+library(doBy)
+library(binom)
+library(extRemes)
+library(forcats)
+```
+
+```{r}
+#Problem 1
+
+#part A
+cancerData = read.csv("http://statistics.uchicago.edu/~collins/data/s226/cancerRemission.csv")
+
+cancerData = mutate(cancerData, p = remissions / cases)
+#cancerData
+
+glm.logit = glm(p~li, family = binomial("logit"), weights = cases, data = cancerData)
+
+#tidy(glm.logit, conf.int = TRUE)
+#drop1(glm.logit, test = "Chisq")
+
+#Verify 4.1a, show this R code and result
+predict(glm.logit, newdata = data.frame(li=8), type = "response")
+
+#Verify 4.1b, show this R code and result(s)
+#Confirm that pi.hat = 0.50 at li = -alpha.hat / beta.hat
+
+coef(glm.logit)
+alpha.hat = as.numeric(coef(glm.logit)[1])
+beta.hat = as.numeric(coef(glm.logit)[2])
+
+#li = -alpha.hat / beta.hat
+#li
+
+#predict(glm.logit, newdata = data.frame(li=26.07), type = "response")
+
+#part B
+glm.probit = glm(p~li, family = binomial("probit"), weights = cases, data = cancerData)
+tidy(glm.probit, conf.int = TRUE)
+
+#part C
+#glm.probit
+
+#part D
+#predict(glm.probit, newdata = data.frame(li=26.07), type = "response")
+
+#part E
+a1 = alpha.hat
+b1 = beta.hat
+
+a2 = -2.318
+b2 = 0.0879
+
+value1 = 
+value2 = 
+
+pi.hat.logit = with(cancerData, exp(a1 + b1*li) / (1 + exp(a1 + b1*li)))
+pi.hat.probit = with(cancerData, pnorm(a2 + b2*li))
+
+gf_point(p~li, data = cancerData) %>%
+  gf_labs(x = "LI (labeling index)", y = "Remission Probability") %>%
+  gf_line(pi.hat.logit~li, linetype="dotted") %>%
+  gf_line(pi.hat.probit~li, linetype="dashed") %>%
+  gf_vline(xintercept = 26.07) %>%
+  gf_hline(yintercept = 0.49986)
+```
+
+```{r}
+#Problem 2
+
+#part A
+donnerData = read.csv("http://statistics.uchicago.edu/~collins/data/s226/donner.csv")
+glimpse(donnerData)
+
+donnerData = mutate(donnerData, sex = fct_rev(sex))
+#tally(~sex, data = donnerData)
+
+glm.logit = glm(status~sex+age, data = donnerData, family = binomial("logit"))
+#tidy(glm.logit, conf.int = TRUE)
+#glm.logit$coefficients
+
+#part B
+#a = 1.6331
+#b1 = 1.5973
+#b2 = -0.0782
+
+#pi.hat.logit.male = with(donnerData, exp(a+b2*age) / (1+exp(a+b2*age)))
+#pi.hat.logit.female = with(donnerData, exp(a+b1+b2*age) / (1+exp(a+b1+b2*age)))
+
+donnerData = mutate(donnerData, statusNum = as.numeric(status) - 1)
+
+#gf_point(statusNum~age, data = donnerData) %>%
+  #gf_labs(x="Age", y="Survival Probability") %>%
+  #gf_line(pi.hat.logit.male~age, linetype = "dotted") %>%
+  #gf_line(pi.hat.logit.female~age, linetype = "dashed")
+
+#part C
+#drop1(glm.logit, test="Chisq")
+#confint(glm.logit)
+
+#part D
+glm.logit2 = glm(status~sex+age+sex*age, data = donnerData, family = binomial("logit"))
+#tidy(glm.logit2, conf.int = TRUE)
+drop1(glm.logit2, test="Chisq")
+
+ax = 0.31834
+b1x = 6.92805
+b2x = -0.03248
+b3 = -0.1616
+
+pi.hat.logit.male2 = with(donnerData, exp(ax+b2x*age) / (1+exp(ax+b2x*age)))
+pi.hat.logit.female2 = with(donnerData, exp(ax+b1x+b2x*age+(b3*1*age)) / (1+exp(ax+b1x+b2x*age+(b3*1*age))))
+
+gf_point(statusNum~age, data = donnerData) %>%
+  gf_labs(x="Age", y="Survival Probability") %>%
+  gf_line(pi.hat.logit.male2~age, linetype = "dotted") %>%
+  gf_line(pi.hat.logit.female2~age, linetype = "dashed")
+
+#part H
+glm.logit3 = glm(status~sex+age+sex*age+I(age^2)+sex*I(age^2), data = donnerData, family = binomial("logit"))
+tidy(glm.logit3, conf.int = FALSE)
+anova(glm.logit, glm.logit3, test="Chisq")
+anova(glm.logit)
+```
+
