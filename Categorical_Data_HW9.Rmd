@@ -1,0 +1,81 @@
+---
+title: "Untitled"
+author: "Patrick Halkett"
+date: "March 8, 2018"
+output: html_document
+---
+
+```{r}
+library(broom)
+library(MASS)
+library(GGally)
+library(openintro)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+
+crabdata = read.table("http://statistics.uchicago.edu/~collins/data/s226/horseshoecrabs.txt", header=TRUE)
+
+glm.weight = glm(Satellites~Weight, data=crabdata, family=poisson)
+
+#summary(glm.weight)
+tidy(glm.weight)
+drop1(glm.weight, test="Chisq")
+```
+
+```{r}
+#Problem 2 Exercise 3.14
+library(mosaic)
+favstats(~Weight, data=crabdata)
+options(digits = 4)
+
+weight.grp = cut(crabdata$Weight, breaks= c(1, seq(1.5, 3.3, by=0.2))) 
+
+satellite.grpmean = mean(Satellites~weight.grp, data=crabdata)
+satellite.grpvar = var(Satellites~weight.grp, data=crabdata)
+
+cbind(table(weight.grp), satellite.grpmean,satellite.grpvar)
+
+nb.weight=glm.nb(Satellites~Weight, data=crabdata)
+nb.weight$theta
+nb.weight$SE.theta
+
+D = 1/nb.weight$theta
+D
+
+confint.default(nb.weight)
+```
+
+```{r}
+#Problem 4
+library(dplyr)
+soccerData = read.table("http://statistics.uchicago.edu/~collins/data/s226/SoccerGameArrests.txt", header=TRUE)
+glm.arrests = glm(arrests~1, offset = log(attendance), family=poisson, data=soccerData)
+tidy(glm.arrests)
+
+#plot(soccerData$attendance, soccerData$arrests, ylim=c(0,305), xlim=c(0,450), pch=20, xlab="Total Attendance (thousands)", ylab="Total Number of Arrests")
+
+#curve(exp(glm.arrests$coef[1])*x, add=T)
+soccerData = mutate(soccerData, glm.pearson=rstandard(glm.arrests, type="pearson"), glm.deviance=rstandard(glm.arrests))
+
+#part d
+nb.arrests = glm.nb(arrests~1+offset(log(attendance)), data=soccerData)
+tidy(nb.arrests)
+tidy(glm.arrests)
+
+nb.arrests$theta
+nb.arrests$SE.theta
+D = 1/nb.arrests$theta
+D
+
+#Alternative c
+plot(soccerData$attendance, soccerData$arrests, ylim=c(0,305), xlim=c(0,450), pch=20, xlab="Total Attendance (thousands)", ylab="Total Number of Arrests") 
+curve(exp(glm.arrests$coef[1]) * x, add=T)
+curve(exp(nb.arrests$coef[1]) * x, add=T, lty=2) 
+soccerData = mutate(soccerData, nb.pearson = rstandard(nb.arrests, type = "pearson"), nb.deviance = rstandard(nb.arrests))
+
+soccerData
+```
+
