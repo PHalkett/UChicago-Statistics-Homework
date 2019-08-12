@@ -1,0 +1,374 @@
+---
+title: "STAT 226: Homework #1"
+author: "Patrick Halkett"
+date: "Tuesday, January 9th by 11am"
+fontsize: 11pt
+output:
+  pdf_document: default
+  word_document: default
+fig_crop: false
+geometry: margin=0.75in
+header-includes:
+  - \usepackage{pdfpages}
+---
+
+
+```{r setup, include=FALSE}
+library(MASS)
+library(GGally)
+library(openintro)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+library(doBy)
+options(width=70, digits=4, scipen=8)
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+opts_chunk$set(size='small') # We set the default R output size a bit smaller
+opts_chunk$set(echo=FALSE) # We set the default to NOT display R code
+```
+
+```{r}
+# Every HW R Markdown document should begin with all the lines of code above.
+
+# Note: This green text is not displayed in the final document 
+# because the default for displaying R code and R comments is echo=FALSE.
+```
+
+### START READING HERE
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For the purposes of homework, we strongly recommend you
+produce a PDF document (not Word, not HTML). R Markdown also lets you easily
+incorporate R code and it's accompanying output inside your document.
+There's no need to copy/paste R text output or to export/import R plots.  
+
+If you want more details on using R Markdown see <http://rmarkdown.rstudio.com>,
+but pretty much everything you would need to know is exemplified in the document
+you are reading right now.
+
+You are only required to use R Markdown for HW1.  
+
+For HW2 and beyond, choose your own process: perhaps
+R Markdown, or LaTeX (possibly with knitr for R), 
+or Word (copy/paste R output and export/import plots), or other?
+
+No matter your process, the final result must be a single PDF file with 
+all the exercises in order and submitted online in Canvas.
+
+
+### INSTRUCTIONS:
+
+Right now, before making any changes to this document, 
+open it in RStudio and compile ("knit") the document.
+To compile ("knit"), just click the **Knit** button in 
+RStudio and choose "Knit to PDF".
+
+We just want to make sure your R environment is set up correctly
+before you start making changes to the file.
+
+If you are working online at rstudio.uchicago.edu, all should work.
+If you are using your own computer, you must install R, Rstudio,
+and TeX (LaTeX).  Follow the instructions here:    
+[http://statistics.uchicago.edu/~collins/Rinstall](http://statistics.uchicago.edu/~collins/Rinstall).
+
+When you click the **Knit** button in RStudio, 
+a document will be generated that includes both content
+(these words) as well as the textual output and plots from 
+any  embedded R code "chunks" within the document. 
+
+### STOP HERE IF YOU CAN'T OUTPUT A PDF DOC
+
+### ASK FOR HELP ON PIAZZA OR AT OFFICE HOURS
+
+Remember, if you are using your own computer rather
+than rstudio.uchicago.edu, then you must install updated 
+versions of R, RStudio, **and TeX (LaTeX)**.
+
+# Q1
+
+### INSTRUCTIONS:
+Complete HW1, Question 1.
+
+Below (inside this .Rmd source file)
+is code that displays my `HWpolicies.pdf` file from Question 1.
+You should replace the file `HWpolicies.pdf` in your HW1 
+folder with your Question 1 PDF file using the same name: `HWpolicies.pdf`.
+Then, your PDF will display below instead of mine.
+
+\includegraphics[height=3in, angle=0]{HWpolicies.pdf}
+
+If your PDF displays sideways or upsidedown,  experiment 
+with the `angle` option (`90`, `180`, or `-90`) to fix this.
+If your graphic appears huge or too small to read, 
+experiment with the `height` option.
+
+#### CAUTION: If you choose to "Knit to Word"...
+This graphic will not appear in your Word doc.   
+You will have to manually import `HWpolicies.pdf` into your Word document.
+
+# Q6
+
+This is Question 6 on the HW1 assignment.
+At the end of this document, we explain how you can
+append Questions 2, 3, 4, and 5 to the end to complete HW1.
+
+Yes, it is OK for HW1 that your work will be in the 
+following order: Questions 1, 6, 2, 3, 4, 5.
+
+## (a) Some basics of R Markdown
+
+### INSTRUCTIONS:
+
+Read the original document (this .Rmd file) to see which R
+code is displayed along with the output and which R code is
+not displayed  in the compiled Word or PDF document.  Be sure you
+understand how to suppress display of R code (unless
+specifically asked to show R code in an exercise).
+
+```{r}
+mydata <- read.csv("http://statistics.uchicago.edu/~collins/stat234/data/sevengr.csv")
+glimpse(mydata)
+head(mydata)
+```
+Notice that only the output (not the R code) of this R chunk is displayed.
+This is because we set the "chunk option" `echo=FALSE` at the start of 
+this document. This suppresess display of R code for every R chunk 
+(unless you override this by specifying `echo=TRUE` in the R chunk).
+
+## (b) Numerical summaries
+
+```{r echo=TRUE}
+aggregate(mydata[3:4], list(mydata$Gender), mean)
+```
+
+Notice that the R code is displayed now because I set
+the option `echo=TRUE` just for this R code chunk.
+Generally, you should not display R code unless the 
+homework exercise specifically asks you to do so.
+To make this easy for you, I set `echo=FALSE` as the default
+at the start of this document and you can just start 
+HW2, HW3, HW4, etc.\ documents by copying this HW1 document
+as a starting point.
+
+### INSTRUCTIONS:
+
+Write an R code chunk here to display the median IQ by gender.
+Do not display the R code, just the results.
+```{r}
+summaryBy(IQ~Gender=="F", data=mydata, FUN = median)
+```
+
+## (c) Saving and printing values
+
+```{r echo=TRUE}
+x <- 20
+```
+
+I chose to set `echo=TRUE` to display the R code above for transparency.
+Since the variable `x` is assigned a value, I can refer to 
+that value inside my document like this: `x` = `r x`.
+
+Look inside this .Rmd file and you will see 
+that I did not type in the number 20 in the previous sentence, 
+instead I referred to the value
+stored in `x` within R, which is... `r x`.
+
+If the value of `x` changes later in the document 
+and I refer to the value after that,
+then the new value will correctly display and I don't 
+have to remember what the value is (or was) while I'm typing.
+
+```{r}
+x <- 15
+```
+
+The value of `x` has now changed to `r x`.
+
+```{r}
+x <- 17
+```
+
+...and now, `x` = `r x`.
+
+
+### INSTRUCTIONS:
+
+Set up an R code chunk here to assign the value $\sqrt{3}$ 
+to a variable called `y`.
+Do not get out a calculator.
+Let R do the calculation for you in the code.
+
+**Please display your R code for this part.**
+
+### INSERT R CODE CHUNK HERE TO ASSIGN SQRT(3) TO VARIABLE y
+
+```{r}
+y = 3**(0.5)
+print(y)
+print(x*y)
+```
+
+
+Then, replace both blanks below by entering code that uses 
+references to `x` and `y` to display what value is 
+assigned to variable `y` and the value of the product (`x * y`).
+
+Do **NOT** get out a calculator and then type in the values yourself.
+Instead, let R and R Markdown do all the work.
+Just refer to the values by their variable names: `x` and `y`.
+
+**HINT:** Above, I displayed the value of `x` like this: 
+The value of `x` is `r x`.    
+Also, multiplication in R uses the `*` operator.
+
+We assigned the number ___1.732___  to the variable `y`.
+
+The product of `x` and `y` is ___29.44___.
+
+## (d) Including and Sizing R Graphs/Plots
+
+When you compile this .Rmd document, you will see that
+the plots below are much too small; not useful or legible.
+
+### INSTRUCTIONS:
+
+Change the code chunk options for `fig.width` and `fig.height` 
+and the `ncol` option in the `grid.arrange` function
+to display a 2-by-2 grid of plots that fills the width of the page.
+Just fill the page width by eye, not by some calculation of page width.
+Also, each of the four plots should be nearer to square in shape
+(avoid plots that are really tall, narrow rectangles or really short, wide rectangles).
+
+
+```{r, fig.width=10, fig.height=10}
+p1 <- gf_histogram(~ IQ, data = mydata, color = "white", bins = 15)
+p2 <- gf_boxplot(IQ ~ Gender, data = mydata)
+p3 <- gf_point(GPA ~ IQ | Gender, data = mydata)
+p4 <- gf_point(GPA ~ IQ, color = ~Gender, data = mydata)
+grid.arrange(p1, p2, p3, p4, ncol=2)
+```
+
+## (e) Including and Sizing scanned and cropped PDF graphics
+
+### INSTRUCTIONS:
+
+Change the `height` of the 
+cropped PDF below as needed for better appearance. 
+
+\includegraphics[height=6in, angle=0]{graphic1.pdf}
+
+#### CAUTION: If you choose to "Knit to Word"...
+This graphic will not appear in your Word doc.   
+You will have to manually import `graphic1.pdf` into your Word document.
+
+## INSTRUCTIONS:
+
+Please fix the display of pdf `graphic2.pdf` below.
+I must have used the CamScanner app with my phone turned sideways!
+You many need to change both the
+`height` and `angle` for a better display.
+
+\includegraphics[height=6in, angle=90]{graphic2.pdf}
+
+#### CAUTION: If you choose to "Knit to Word"...
+This graphic will not appear in your Word doc.   
+You will have to first open the file `graphic2.pdf` and rotate it,
+save it, then manually import it into your Word document.
+
+
+## (f) Including and scanned PDF multi-page files
+
+First, we demonstrate how to bring in all pages a multi-page PDF file:
+
+#### CAUTION: If you choose to "Knit to Word"...
+None of the pdf pages of `multipage.pdf` will appear in your document.
+
+
+Now, we demonstrate bringing in just a subset of the pages of a multi-page PDF file.   
+In this case we include only pages 3 and 4.
+
+#### CAUTION: If you choose to "Knit to Word"...
+The two pdf pages (3--4) in `multipage.pdf` will not appear in your document.
+
+## INSTRUCTIONS:
+
+  1. Now you write one command modeled after the two above, but 
+  include only pages 2 and 4 of the 4-page PDF called `multipage.pdf`.
+
+  For help, see the bottom of page 2 
+  in the LaTeX documentation about `\includepdf` at   
+  [http://ctan.math.utah.edu/ctan/tex-archive/macros/latex/contrib/pdfpages/pdfpages.pdf](http://ctan.math.utah.edu/ctan/tex-archive/macros/latex/contrib/pdfpages/pdfpages.pdf)
+ 
+\includepdf[pages={2}, width=!, height=!, angle=0]{multipage.pdf}
+\includepdf[pages={4}, width=!, height=!, angle=0]{multipage.pdf}
+ 
+  2. Delete the two commands above that bring in all 4 pages of
+  `multipage.pdf` and then pages 3--4 of `multipage.pdf`.
+  In the end, you should have one command that includes only
+  pages 2 and 4 of `multipage.pdf`.
+
+#### CAUTION: If you choose to "Knit to Word"...
+The two pdf pages 2 and 4 in `multipage.pdf` will not appear in your document.
+You will have to append them to your document later, after you save
+your Word file as a PDF file (use workflow option 3 or 4 below).
+
+# INSTRUCTIONS: THE LAST STEP
+
+# Incorporate Questions 2, 3, 4, and 5 into This Document
+
+At this point, you have completed Q1 and Q6 within this document
+and the result after compiling ("Knit to PDF") 
+should be a document about 11--12 pages long
+(two of these pages are pages 2 and 4 of `multipage.pdf`).
+Now, you need to append your answers to Q2--Q5 to this PDF document.
+
+You have several choices for completing the rest of HW1 by
+combining everything above plus placing Q2---Q5 at the end to create a 
+single PDF document that includes Questions 1, 6, 2, 3, 4, and 5.
+
+Yes, I realize that Question 6 will be out of order.
+That's the easiest order for HW1, so we recommend it.
+
+Here are a few options I can think of to combine
+Q1 and Q6 with Q2--Q5 into a single PDF file.
+
+  1. Continue using R Markdown and type 
+  in your answers to Q2--Q5 using regular text and LaTeX 
+  commands    ...like this: I found the $z$-score as
+  $$z = \frac{x - \mu}{\sigma}$$
+  
+  2. Handwrite your answers to Q2--Q5, scan them into a single PDF file 
+  (or several cropped PDFs),  and incorporate the PDF(s) into 
+  this R Markdown document just as in Q6 parts (e) and/or (f) above.
+  
+  3. Compile this R Markdown file to Word (instead of a PDF) and
+  continue that Word document by writing your answers to Q2--Q5 in Word.    
+  Remember, you will have to go back and manually insert all the
+  other graphs into your finished product: `HWpolicies.pdf`, `graphic1.pdf`,
+  `graphic2.pdf`, and pages 2 and 4 of `multipage.pdf`.
+  When finished, save the Word document as a PDF file to submit.
+  
+  4. Compile this R Markdown file to Word (instead of a PDF), 
+  handwrite your answers to Q2--Q5, scan to PDF, and
+  import the PDF into Word.  
+  Remember, you will have to go back and manually insert all the
+  other graphs into your finished product: `HWpolicies.pdf`, `graphic1.pdf`,
+  `graphic2.pdf`, and pages 2 and 4 of `multipage.pdf`.
+  
+  5. Compile this R Markdown file to PDF.  
+  Handwrite your answers to Q2--Q5 and scan to PDF.
+  Combine the two PDFs into one using, for example, 
+  the Preview app on a Mac.
+  
+  6. Compile this file to PDF and write your answers to 
+  Q2--Q5 in a separate LaTeX file. Compile the LaTeX file to PDF 
+  and combine the two PDFs however you prefer.
+  
+  
+  
