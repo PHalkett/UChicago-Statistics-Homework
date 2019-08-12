@@ -1,0 +1,111 @@
+---
+title: "Homework 4"
+author: "Patrick Halkett"
+date: "January 26, 2018"
+output: pdf_document
+---
+
+```{r}
+library(MASS)
+library(GGally)
+library(openintro)
+library(mosaic)
+library(knitr)
+library(tidyverse)
+library(ggformula)
+library(gridExtra)
+library(broom)
+library(doBy)
+library(binom)
+library(extRemes)
+```
+
+```{r}
+#####################################################
+#Problem 1
+#####################################################
+n11 = 154
+n21 = 132
+n12 = 180
+n22 = 126
+n13 = 104
+n23 = 131
+
+data.table = matrix( 
+  c(n11, n21, n12, n22, n13, n23), 
+  nrow=2, 
+  dimnames = list(c("Yes", "No"), c("Support", "Oppose", "Do Not Know"))
+)
+data.table
+
+data.full = addmargins(data.table, FUN = list(Total = sum), quiet=TRUE)
+data.full
+
+nrow1 = data.full[1,4]
+nrow2 = data.full[2,4]
+
+p1 = n11 / nrow1
+p2 = n21 / nrow2
+
+chisq.results = chisq.test(data.table, correct = FALSE)
+chisq.results$statistic
+chisq.results$p.value
+
+chisq.results$stdres
+```
+
+```{r}
+###############################################
+####### Question 2
+###############################################
+
+data.values =
+c(147 , 186 , 101 , 83,
+   25 ,  26 ,  11 , 29,
+   32 ,  39 ,  15 , 15,
+   94 , 105 ,  37 , 22,
+   59 ,  74 ,  28 , 43,
+   18 ,  10 ,  10 ,  4)
+
+data.table = matrix(data.values, byrow=TRUE, nrow=6,
+  dimnames = list( c("a", "an", "this", "that", "with", "without"),
+    c("Sense and Sensibility", "Emma", "Sanditon (Austen)", "Sanditon (Imitator)") ) )
+data.table
+
+data.full = addmargins(data.table, FUN = list(Total = sum), quiet=TRUE)                    
+data.full
+
+chisq.results = chisq.test(data.table, correct = FALSE)
+chisq.results$statistic
+chisq.results$p.value
+
+G2 = with( chisq.results, 2 * sum( observed * log(observed / expected) ) )
+pchisq(G2, df=15, lower.tail = FALSE)
+
+
+chisq.results$stdres
+
+data.table.Austen = data.table[, 1:3]
+data.table.Austen
+
+Austen = addmargins(data.table.Austen, 2, quiet=TRUE)[, 4]
+Imitator = data.table[,4]
+data.table.multi.author = cbind(Austen, Imitator) 
+data.table.multi.author
+```
+
+```{r}
+###############################################
+####### Question 3
+###############################################
+
+data.table = matrix(c(21, 15, 2, 3), nrow=2,
+                    dimnames = list(c("Surgery", "Radiation"), 
+                                    c("Cancer Controlled", "Not Controlled") ) )
+data.table
+
+dhyper(21, 36, 5, 23)
+fisher.results = fisher.test(data.table, alternative = "two.sided")
+fisher.results$p.value
+```
+
