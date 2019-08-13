@@ -1,0 +1,133 @@
+---
+title: "STAT222_HW8"
+author: "Patrick Halkett"
+date: "May 21, 2018"
+output: html_document
+---
+
+```{r}
+source("http://www.stat.uchicago.edu/~pmcc/courses/regress.R")
+
+#Problem 1
+yield = c(53.4,54.3,55.9,46.5,57.2,57.4, 
+          53.8,56.3,58.6,51.1,56.9,60.2, 
+          58.2,60.4,62.4,49.2,61.6,57.2, 
+          59.5,64.5,64.5,51.3,66.8,62.7)
+
+pesticide <- as.factor(rep(1:3,8))
+irrigation <- as.factor(rep(1:2,each=12))
+variety <- as.factor(rep(rep(1:2,each=6),2))
+
+field <- as.factor(rep(1:6,4))
+strip <- as.factor(c(rep(1:6,2),rep(7:12,2)))
+
+df <- data.frame(pesticide,irrigation,variety,yield)
+df
+
+#part 1
+fit <- regress(yield~pesticide+irrigation+variety,~field+strip)
+summary(fit)
+
+#part 2
+#done by hand
+
+#part 3
+#done by hand
+
+#part 4
+tapply(yield,pesticide,mean)[2] - tapply(yield,pesticide,mean)[3]
+
+## Part 5
+df5 <- 3
+n5 <- 6
+tapply(yield,pesticide,mean)[1] - tapply(yield,pesticide,mean)[2]
+
+tcrit5 <- abs(qt(0.1/2,df5))
+tcrit5*(sqrt(2.855)/sqrt(n5))
+
+
+
+## Part 6
+df6 <- 10
+n6 <- 12
+tapply(yield,irrigation,mean)[1] - tapply(yield,irrigation,mean)[2] 
+
+tcrit6 <- abs(qt(0.1/2,df6))
+tcrit6*(sqrt(1.121)/sqrt(n6))
+
+
+```
+
+```{r}
+#Problem 2
+set.seed(22203)
+nstudents <- 48; nassignments <- 8
+ngraders <- 3; nscripts <- 16
+n <- nstudents*nassignments
+
+student <- rep(1:nstudents,nassignments)
+assignment <- rep(1:nassignments,rep(nstudents,nassignments))
+graderid <- rep(1:3,nscripts)
+grader <- rep(0,0)
+
+for(i in 1:nassignments)
+  grader <- c(grader,graderid[order(runif(nstudents))])
+
+ability <- rnorm(nstudents,mean=60,sd=12) #student ability
+difficulty <- rnorm(nassignments,mean=0,sd=8) #asst difficulty
+generosity <- rnorm(ngraders,mean=0,sd=10) #grader generosity
+
+score <- ability[student] - difficulty[assignment] + generosity[grader] + rnorm(n,sd=5)
+score <- round(score,0)
+meanscore <- tapply(score,student,mean)
+
+S <- as.factor(student); A <- as.factor(assignment); G <- as.factor(grader)
+fit <- lm(score~S+A+G)
+anova(fit)
+
+adjmeanscore <- c(0,fit$coef[2:nstudents]) + fit$coef[1]
+cor(cbind(ability,meanscore,adjmeanscore))
+
+plot(rank(ability),rank(meanscore),cex=0.8)
+points(rank(ability), rank(adjmeanscore),cex=0.5,col="red")
+c(mean(abs(rank(ability)-rank(meanscore))),mean(abs(rank(ability)-rank(adjmeanscore))))
+
+gscount <- matrix(table(G:S),ngraders,nstudents,byrow=T)
+
+#part 1
+#gscount
+#for the 48 students, the numbers for 1,2,3 indicate how many homework assignments were graded by (that^) particular TA
+
+#part 2
+mean_TA <- tapply(score,grader,mean)
+mean_TA
+#for this particular seed, grader (3) was certainly the least generous in allocating points (49.65). Of the 48 students, Student38 was assigned most frequently to G_0 (6 times).
+
+#part 3
+#generosity[grader] has 384 components, since there are three blocks of size 128 units each
+#line 11 defines an expression for the assignment scores, which is composed of the students innate ability minus the numerical difficulty of the assignment, but summed with the generosity of the grader and some normal error component with a SD of 5
+
+#part 4
+#order(adjmeanscore)
+#order(meanscore)
+#these two orderings are not the same since 'adjmeanscore' is calculated from the coefficients of the fit function found when using a linear model of the student/assignment/grader predictors as factors, which is not necessarily the same as the raw mean scores (students were graded differently by each grader)
+
+#part 5
+#cor(cbind(ability,meanscore,adjmeanscore))
+#in R, this code creates a correlation matrix between students' innate ability, their mean score, and their adjusted mean score. The correlation of some variable will always be 1, which is why the diagonal for this matrix is unity. We can also see that the 'adjmeanscore' is more closely tied to students' innate ability since the coefficient is closer to one (0.989) than for 'meanscore' (0.946)
+
+#part 6
+#c(mean(abs(rank(ability)-rank(meanscore))),mean(abs(rank(ability)-rank(adjmeanscore))))
+#this line of R code returns two numbers, both of which are means: one calculated as the absolute value from subtracting rank of 'meanscore' from rank of 'ability', and the other is the same except we are subtracting rank of 'adjmeanscore'. We can see that the mean from 'adj-' (1.5) is much smaller than that from 'meanscore' (4.02), indicating that our adjustment is better at helping students be true to their innate ability/rank
+
+#part 7
+#fit2 <- regress(score~A+G,~S)
+#summary(fit2)
+#the two variance components (Id and S) are estimates for the variance for the students' scores and ability, respectively. The true values would be (12^2 = 144 for ability) and (5^2 = 25 for scores), and are fairly close to estimates (167 for S) and (24 for Id)
+
+#part 8
+#G2          -15.7613      0.647 -24.35
+#G3          -24.6893      0.661 -37.35
+#the G2 and G3 estimates are the different grader effects, and are equivalent to (G2 <- grader2 - grader1) and (G3 <- grader3 - grader1). The actual values would be given by (G2 = 57.56 - 72.75 = -15.19) and (G3 = 49.65 - 72.75 = -23.10) and while G2 is within SE (0.647), G3 is not (0.661 is too small)
+```
+
