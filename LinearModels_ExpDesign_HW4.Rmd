@@ -1,0 +1,129 @@
+---
+title: "STAT222HW4"
+author: "Patrick Halkett"
+date: "April 22, 2018"
+output: html_document
+---
+```{r}
+#Part 1
+Y <- c(3.45, 6.21, 4.26, 7.94, 4.45, 6.71, 5.62, 8.24)
+I <- rep(1, 8)
+A <- rep(c(-1,1),4)
+B <- rep(rep(c(-1,1), c(2,2)),2)
+AB <- A*B
+C <- rep(c(-1,1), c(4,4))
+AC <- A*C
+BC <- B*C
+ABC <- A*B*C
+matrix1 <- cbind(I, A, B, AB, C, AC, BC, ABC)
+matrix1
+betahat1 <- t(matrix1) %*% Y/8
+betahat1
+#diag(8)
+
+#Part 2
+#betahat.I = sum(Y)/8
+betahat.I = 5.86
+
+#betahat.A = sum(A*Y)/8
+betahat.A = 1.415
+
+#betahat.B = sum(B*Y)/8
+betahat.B = 0.655
+
+#betahat.AB = sum(AB*Y)/8
+betahat.AB = 0.16
+
+#betahat.C = sum(C*Y)/8
+betahat.C = 0.395
+
+#betahat.AC = sum(AC*Y)/8
+betahat.AC = -0.195
+
+#betahat.BC = sum(BC*Y)/8
+betahat.BC = 0.02
+
+#betahat.ABC = sum(ABC*Y)/8
+betahat.ABC = -0.07
+
+betahats <- c(5.86, 1.415, 0.655, 0.16, 0.395, -0.195, 0.02, -0.07)
+
+df <- data.frame(I,A,B,AB,C,AC,BC,ABC, betahats)
+df
+
+#Part 3
+SSI <- 8*(betahat.I)^2
+SSI
+
+SSA <- 8*(betahat.A)^2
+SSA
+
+#Part 4
+AF <- as.factor(A)
+BF <- as.factor(B)
+CF <- as.factor(C)
+modelA <- lm(Y~AF*BF*CF)
+anova(modelA)
+
+#Part 5
+#tapply(Y, A, mean)
+var(tapply(Y, A, mean))
+
+#Part 6
+tapply(Y, A, sum)
+var(tapply(Y, A, sum))
+
+#Part 7
+as.factor(A):as.factor(B)
+
+#Part 8
+tapply(Y, as.factor(A):as.factor(B), mean)
+var(tapply(Y, as.factor(A):as.factor(B), mean))
+
+#Part 9
+model1 <- lm(Y~A+B)
+model2 <- lm(Y~A+B+C)
+anova(model1, model2)
+
+#Part 10
+#model3 <- lm(Y~AF+BF+CF)
+#summary(model3)
+#B2 = factor(B, levels=c(1,-1))
+#C2 = factor(C, levels=c(1,-1))
+#modelB <- lm(Y~A2*B2*C2)
+
+#Part 11
+one = Y[1]
+a = Y[2]
+b = Y[3]
+ab = Y[4]
+c = Y[5]
+ac = Y[6]
+bc = Y[7]
+abc = Y[8]
+
+((a+1)*(b-1)*(c+1))/4
+
+#Part 12
+#A2 = factor(A, levels=c(1,-1))
+#modelA
+#modelB
+#Part 1
+Y2 <- c(3.45, 6.21, 4.26, 7.94, 4.45, 6.71, 5.62, 8.24)
+I2 <- rep(1, 8)
+A2 <- rep(c(1,-1),4)
+B2 <- rep(rep(c(1,-1), c(2,2)),2)
+AB2 <- A2*B2
+C2 <- rep(c(1,-1), c(4,4))
+AC2 <- A2*C2
+BC2 <- B2*C2
+ABC2 <- A2*B2*C2
+matrix2 <- cbind(I2, A2, B2, AB2, C2, AC2, BC2, ABC2)
+matrix2
+betahat2 <- t(matrix2) %*% Y2/8
+betahat2
+
+#Part 13
+x <- rep(c(-1,1),4)[order(runif(8))]
+x
+```
