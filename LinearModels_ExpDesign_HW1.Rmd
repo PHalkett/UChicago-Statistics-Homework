@@ -1,0 +1,33 @@
+---
+title: "STAT222_HW1"
+author: "Patrick Halkett"
+date: "April 1, 2018"
+output: html_document
+---
+
+```{r}
+#Problem 3
+x <- runif(4)
+print(x)
+order(x)
+rank(x)
+```
+
+```{r}
+#Problem 4
+x <- runif(5)
+print("Help ME")
+order(x)
+rank(x)
+order(log(x))
+order(1/x)
+rank(1/x)
+order(rank(x))
+```
+
+```{r}
+#Problem 5
+n <- 120; row <- rep(1:10, rep(12, 10)); col <- rep(1:12, 10); variety0 <- rep(1:15, 8)
+
+set.seed(22200); variety <- variety0[order(runif(n))]; matrix(variety, 10, 12, byrow=TRUE)
+```
