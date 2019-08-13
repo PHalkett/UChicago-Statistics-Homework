@@ -1,0 +1,119 @@
+---
+title: "STAT222 Homework 3"
+author: "Patrick Halkett"
+date: "April 14, 2018"
+output: html_document
+---
+```{r}
+library(FSA)
+library(Metrics)
+```
+
+```{r}
+a = log(2705)
+b = log(1718)
+
+#part 1
+#mean(boar_data$y)
+
+#part 2
+#check arithmetic?
+
+#part 3
+#log_trans <- log(boar_data$y)
+#anova(lm(log_trans~as.factor(boar_data$litter)+as.factor(boar_data$GH)+as.factor(boar_data$FSH)))
+blk <- rep(1:6,4)
+trt <- rep(1:4,each=6)
+data <- c(1641,1290,2411,2527,1930,2158,1829,1811,1897,1506,2060,1207,3395,3113,2219,2667,2210,2625,1537,1991,3639,2246,1840,2217)
+boar.data <- log(data)
+anova(lm(boar.data~as.factor(blk)+as.factor(trt)))
+summary(lm(boar.data~as.factor(blk)+as.factor(trt)))
+
+#part 4
+#fit1 <- lm(log_trans~boar_data$litter+boar_data$GH+boar_data$FSH)
+#summary(fit1)
+#fitGH <- lm(log_trans~boar_data$GH)
+#fitFSH <- lm(log_trans~boar_data$FSH)
+
+summary(lm(log_trans~boar_data$litter+boar_data$GH))
+summary(lm(log_trans~boar_data$litter+boar_data$FSH))
+
+#part 5
+#fuck me 
+
+#part 6
+#test_stat=0.456
+#divide by standard error0.143 = 3.19
+#t.test(boar_data, mu=0, conf.level=0.95)
+2*pt(3.19, 15, lower=FALSE)
+#df=15
+
+#part 7
+ptukey(4.51, 4, 15)
+```
+
+```{r}
+#Problem 2
+df <- read.table("http://www.stat.umn.edu/~gary/book/fcdae.data/pr13.9", header=TRUE)
+head(df)
+#df$cage.group
+#df$trt
+#df$avg.wt.gain
+
+df$cage.group = factor(df$cage.group,
+                       levels=unique(df$cage.group))
+df$trt = factor(df$trt,
+                levels=unique(df$trt))
+
+#df$cage.group
+#df$trt
+
+Avg_Weight_Gain <- df$avg.wt.gain
+Cage_Group <- df$cage.group
+Treatment <- df$trt
+
+lm(Avg_Weight_Gain~factor(Cage_Group)+factor(Treatment))
+anova(lm(Avg_Weight_Gain~factor(Cage_Group)+factor(Treatment)))
+#interaction.plot(Treatment, Cage_Group, Avg_Weight_Gain)
+#plot(residuals(lm(Avg_Weight_Gain~factor(Cage_Group)+factor(Treatment))))
+```
+
+```{r}
+#Problem 2 Alternative
+Y.OG <- c(23.63, 19.86, 24.00, 22.11, 25.38, 24.18, 23.43, 18.75, 20.70, 20.02, 23.95, 19.13, 21.21, 20.89, 23.55, 22.89, 19.95, 18.29, 17.61, 19.89, 23.96, 20.46, 22.55, 17.30, 21.16, 19.02, 19.38, 19.46, 20.48, 19.54, 19.96, 20.71, 23.71, 16.44, 20.71, 20.16, 21.70, 21.47, 20.44, 22.51, 20.38, 18.68, 20.91, 23.07, 22.54, 21.73, 25.04, 23.22, 21.57, 17.38, 19.55, 19.79, 20.77, 18.36, 20.32, 21.98, 18.52, 18.84, 22.54, 19.95, 21.27, 20.09, 19.27, 20.02, 23.14, 20.46, 18.14, 21.70, 22.93, 21.29, 22.49)
+treatment <- c(rep(1:8,each=8), 9,9,9,9,9,9,9)
+OG.fit <- anova(lm(Y.OG~as.factor(treatment)))
+OG.fit
+first <- lm(Y.OG~as.factor(treatment))
+summary(first)
+
+Y.AG <- c(23.63, 19.86, 24.00, 22.11, 25.38, 24.18, 23.43, 18.75, 20.70, 20.02, 23.95, 19.13, 21.21, 20.89, 23.55, 22.89, 19.95, 18.29, 17.61, 19.89, 23.96, 20.46, 22.55, 17.30, 21.16, 19.02, 19.38, 19.46, 20.48, 19.54, 19.96, 20.71, 23.71, 16.44, 20.71, 20.16, 21.70, 21.47, 20.44, 22.51, 20.38, 18.68, 20.91, 23.07, 22.54, 21.73, 25.04, 23.22, 21.57, 17.38, 19.55, 19.79, 20.77, 18.36, 20.32, 21.98, 18.52, 18.84, 22.54, 19.95, 21.27, 20.09, 19.27, 20.02, 23.14, 20.46, 18.14, 21.70, 22.93, 21.29, 22.49)
+cage.group <- c(rep(1:8,8), 1,2,3,4,5,6,7)
+
+alf.meal <- c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)
+
+alf.type <- c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3)
+
+cal <- c(0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0)
+
+length(alf.type)
+length(alf.meal)
+length(cal)
+
+
+AG <- anova(lm(Y.AG~as.factor(cage.group)+as.factor(alf.meal)+as.factor(alf.type)+as.factor(cal)))
+
+second <- lm(Y.AG~as.factor(cage.group)+as.factor(alf.meal)+as.factor(alf.type)+as.factor(cal))
+
+AIC(first,second)
+```
+
+
+```{r}
+#Problem 3
+#mean(log(rchisq(10000, df=10)/10))
+#mean(rchisq(10000,df=10)/10)
+var(log(rchisq(10000, df=10)))
+log(10)
+```
+
