@@ -1,0 +1,64 @@
+---
+title: "STAT222HW6"
+author: "Patrick Halkett"
+date: "May 5, 2018"
+output: html_document
+---
+
+```{r}
+#Problem 1
+Species <- c(rep(rep(c("Spruce","Pine","Larch","Spruce","Pine","Larch"),times=c(1,1,1,1,1,1)),6))
+
+Bark <- c(rep(c(rep("F",3), rep("T",3)),6))
+
+WC_Team <- c(rep("1",6), rep("2",6), rep("3",6), rep("4",6), rep("5",6), rep("6",6))
+
+sawid <- c("C","B","E","F","D","A", "E","F","A","D","B","C",  "D","E","B","A","C","F", "B","A","F","C","E","D", "A","D","C","E","F","B", "F","C","D","B","A","E")
+
+Time <- c(0.806,0.833,1.104,0.944,0.869,1.117, 1.037,0.792,1.127,1.009,1.000,1.079, 0.991,0.898,1.097,1.097,0.919,1.079, 0.875,0.778,0.863,0.934,0.806,1.053, 0.663,0.602,0.785,0.785,0.633,0.785, 0.690,0.623,0.869,0.778,0.748,0.987)
+
+mydata <- data.frame(Species,Bark,WC_Team,sawid,Time)
+mydata
+
+#matrix(mydata$Time,6,6)
+#matrix(mydata$Letters,6,6)
+
+#part 1
+fit <- lm(Time~Species+WC_Team+sawid)
+anova(fit)
+
+#part 2
+sawmean <- tapply(Time,sawid,mean)
+30*var(sawmean)
+
+#part 3
+#tappy()
+
+#part 4
+
+
+#part 5
+#anova(lm(Time~WC_Team+Species*Bark+sawid))
+
+#part 6
+#lm(Time~WC_team+Species+Bark+sawbrand)
+
+#part 7
+
+
+#part 8
+
+
+#part 9
+
+
+#part 10
+
+
+#part 11
+#fit0 <- lm(Time~mf0)
+#fv <- fit0$fitted.values
+#fv2 <- fv^2
+#anova(lm(Time~mf0+fv2))
+```
+
